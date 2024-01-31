@@ -1,0 +1,131 @@
+import React, { useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+  TextField,
+  Button,
+} from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+interface City {
+  id: number;
+  name: string;
+  population: number;
+  description:string;
+}
+interface CityTableProps {
+  cities: City[];
+  onUpdate: (cityId: number, updatedCityData: City) => void;
+  onDelete: (cityId: number) => void;
+}
+const CityTable: React.FC<CityTableProps> = ({ cities, onUpdate, onDelete }) => {
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const [editingCityId, setEditingCityId] = useState<number | null>(null);
+  const [editedCity, setEditedCity] = useState<City>({
+    id: 0,
+    name: "",
+    population: 0,
+    description:""
+  });
+  const handleRowHover = (id: number) => {
+    setHoveredRow(id);
+  };
+  const handleRowLeave = () => {
+    setHoveredRow(null);
+  };
+  const handleEditClick = (city: City) => {
+    setEditingCityId(city.id);
+    setEditedCity(city);
+  };
+  const handleCancelEdit = () => {
+    setEditingCityId(null);
+    setEditedCity({ id: 0, name: "", population: 0, description: "" });
+  };
+  const handleSaveEdit = () => {
+    onUpdate(editingCityId!, editedCity);
+    setEditingCityId(null);
+    setEditedCity({ id: 0, name: "", population: 0, description: ""  });
+  };
+  return  (
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>ID</TableCell>
+            <TableCell>Name</TableCell>
+            <TableCell>Population</TableCell>
+            <TableCell>Description</TableCell>
+            <TableCell>Actions</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {cities.map((city) => (
+            <TableRow
+              key={city.id}
+              onMouseEnter={() => handleRowHover(city.id)}
+              onMouseLeave={handleRowLeave}
+              style={{ backgroundColor: hoveredRow === city.id ? "#F0F0F0" : "inherit" }}
+            >
+              <TableCell>{city.id}</TableCell>
+              {editingCityId === city.id ? (
+                <>
+                  <TableCell>
+                    <TextField
+                      value={editedCity.name}
+                      onChange={(e) => setEditedCity({ ...editedCity, name: e.target.value })}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <TextField
+                      type="number"
+                      value={editedCity.population}
+                      onChange={(e) =>
+                        setEditedCity({ ...editedCity, population: parseInt(e.target.value, 10) || 0 })
+                      }
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <TextField
+                      value={editedCity.description}
+                      onChange={(e) => setEditedCity({ ...editedCity, description: e.target.value })}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Button onClick={handleSaveEdit} variant="outlined">
+                      Save
+                    </Button>
+                    <Button onClick={handleCancelEdit} variant="outlined">
+                      Cancel
+                    </Button>
+                  </TableCell>
+                </>
+              ) : (
+                <>
+                  <TableCell>{city.name}</TableCell>
+                  <TableCell>{city.population}</TableCell>
+                  <TableCell>{city.description}</TableCell>
+                  <TableCell>
+                    <IconButton onClick={() => handleEditClick(city)}>
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton onClick={() => onDelete(city.id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </>
+              )}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+};
+export {}
+export default CityTable;
